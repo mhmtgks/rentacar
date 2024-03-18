@@ -2,11 +2,15 @@ package com.turkcell.rentacar.businnes.concretes;
 
 
 import com.turkcell.rentacar.businnes.abstracts.TransmissionService;
+import com.turkcell.rentacar.core.utilities.mapping.ModelMapperManager;
 import com.turkcell.rentacar.dataAccess.abstracts.TransmissionRepository;
+import com.turkcell.rentacar.dtos.reponses.CreateTransmissionResponse;
+import com.turkcell.rentacar.dtos.requests.CreateTransmissionRequest;
 import com.turkcell.rentacar.entities.concretes.Transmission;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,12 +20,19 @@ public class TransmissionManager implements TransmissionService {
     TransmissionRepository transmissionRepository; // IoC
     private static final String transmissionNotFoundMessage = "Transmission not found";
     private static final String transmissionAlreadyExistsMessage = "Transmission already exists";
+    private ModelMapperManager modelMapperService;
+
 
     @Override
-    public Transmission add(Transmission transmission) {
-        // TODO: Validation rules
-        transmissionNameCanNotBeDuplicatedWhenInserted(transmission.getName());
-        return transmissionRepository.save(transmission);
+    public CreateTransmissionResponse add(CreateTransmissionRequest createTransmissionRequest) {
+        Transmission transmission =this.modelMapperService.forRequest().map(createTransmissionRequest,Transmission.class);
+        transmission.setCreatedDate(LocalDateTime.now());
+
+        Transmission createdTransmission = transmissionRepository.save(transmission);
+
+        CreateTransmissionResponse createTransmissionResponse= this.modelMapperService.forResponse().map(createdTransmission,CreateTransmissionResponse.class);;
+
+        return createTransmissionResponse;
     }
 
     @Override

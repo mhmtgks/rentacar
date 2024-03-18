@@ -1,12 +1,14 @@
 package com.turkcell.rentacar.businnes.abstracts;
 
 
+import com.turkcell.rentacar.dtos.reponses.CreateTransmissionResponse;
+import com.turkcell.rentacar.dtos.requests.CreateTransmissionRequest;
 import com.turkcell.rentacar.entities.concretes.Transmission;
 
 import java.util.List;
 
 public interface TransmissionService {
-    Transmission add(Transmission transmission);
+    CreateTransmissionResponse add(CreateTransmissionRequest createTransmissionRequest);
 
     Transmission update(Transmission transmission);
 

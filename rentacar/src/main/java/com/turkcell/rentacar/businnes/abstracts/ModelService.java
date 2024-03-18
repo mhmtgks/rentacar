@@ -1,11 +1,13 @@
 package com.turkcell.rentacar.businnes.abstracts;
 
+import com.turkcell.rentacar.dtos.reponses.CreateModelResponse;
+import com.turkcell.rentacar.dtos.requests.CreateModelRequest;
 import com.turkcell.rentacar.entities.concretes.Model;
 
 import java.util.List;
 
 public interface ModelService {
-    Model add(Model model);
+    CreateModelResponse add(CreateModelRequest model);
 
     Model update(Model model);
 

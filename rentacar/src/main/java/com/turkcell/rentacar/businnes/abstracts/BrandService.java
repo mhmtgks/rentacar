@@ -1,11 +1,13 @@
 package com.turkcell.rentacar.businnes.abstracts;
 
+import com.turkcell.rentacar.dtos.reponses.CreateBrandResponse;
+import com.turkcell.rentacar.dtos.requests.CreateBrandRequest;
 import com.turkcell.rentacar.entities.concretes.Brand;
 
 import java.util.List;
 
 public interface BrandService {
-    Brand add(Brand brand);
+    CreateBrandResponse add(CreateBrandRequest createBrandRequest);
 
     Brand update(Brand brand);
 

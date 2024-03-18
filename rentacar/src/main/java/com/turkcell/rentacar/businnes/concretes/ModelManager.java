@@ -5,7 +5,11 @@ import com.turkcell.rentacar.businnes.abstracts.BrandService;
 import com.turkcell.rentacar.businnes.abstracts.FuelService;
 import com.turkcell.rentacar.businnes.abstracts.ModelService;
 import com.turkcell.rentacar.businnes.abstracts.TransmissionService;
+import com.turkcell.rentacar.core.utilities.mapping.ModelMapperManager;
 import com.turkcell.rentacar.dataAccess.abstracts.ModelRepository;
+import com.turkcell.rentacar.dtos.reponses.CreateModelResponse;
+import com.turkcell.rentacar.dtos.reponses.GetFuelResponse;
+import com.turkcell.rentacar.dtos.requests.CreateModelRequest;
 import com.turkcell.rentacar.entities.concretes.Brand;
 import com.turkcell.rentacar.entities.concretes.Fuel;
 import com.turkcell.rentacar.entities.concretes.Model;
@@ -13,6 +17,7 @@ import com.turkcell.rentacar.entities.concretes.Transmission;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,14 +30,23 @@ public class ModelManager implements ModelService {
     TransmissionService transmissionService;
 
     private static final String modelNotFoundMessage = "Model not found";
+    private ModelMapperManager modelMapperService;
+
 
     @Override
-    public Model add(Model model) {
-        // TODO: Validation rules
-        brandIdShouldBeExist(model.getBrand().getId());
-        fuelIdShouldBeExist(model.getFuel().getId());
-        transmissionIdShouldBeExist(model.getTransmission().getId());
-        return modelRepository.save(model);
+    public CreateModelResponse add(CreateModelRequest createModelRequest) {
+
+        Model model = this.modelMapperService.forRequest().map(createModelRequest,Model.class);
+        model.setCreatedDate(LocalDateTime.now());
+
+
+        Model createdModel = modelRepository.save(model);
+
+        CreateModelResponse createModelResponse= this.modelMapperService.forResponse().map(createdModel,CreateModelResponse.class);
+
+
+        return createModelResponse;
+
     }
 
     @Override
@@ -87,7 +101,7 @@ public class ModelManager implements ModelService {
     }
 
     private void fuelIdShouldBeExist(int fuelId) {
-        Fuel fuel = fuelService.get(fuelId);
+        GetFuelResponse fuel = fuelService.get(fuelId);
     }
 
     private void transmissionIdShouldBeExist(int transmissionId) {

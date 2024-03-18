@@ -1,5 +1,7 @@
 package com.turkcell.rentacar.api.controllers;
 import com.turkcell.rentacar.businnes.abstracts.TransmissionService;
+import com.turkcell.rentacar.dtos.reponses.CreateTransmissionResponse;
+import com.turkcell.rentacar.dtos.requests.CreateTransmissionRequest;
 import com.turkcell.rentacar.entities.concretes.Transmission;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -15,8 +17,8 @@ public class TransmissionsController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Transmission add(@RequestBody Transmission transmission) {
-        return transmissionService.add(transmission);
+    public CreateTransmissionResponse add(@RequestBody CreateTransmissionRequest createTransmissionRequest) {
+        return transmissionService.add(createTransmissionRequest);
     }
 
     @PutMapping

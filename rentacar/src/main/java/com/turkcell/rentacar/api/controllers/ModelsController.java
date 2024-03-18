@@ -2,6 +2,8 @@ package com.turkcell.rentacar.api.controllers;
 
 
 import com.turkcell.rentacar.businnes.abstracts.ModelService;
+import com.turkcell.rentacar.dtos.reponses.CreateModelResponse;
+import com.turkcell.rentacar.dtos.requests.CreateModelRequest;
 import com.turkcell.rentacar.entities.concretes.Model;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +19,7 @@ public class ModelsController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Model add(@RequestBody Model model) {
+    public CreateModelResponse add(@RequestBody CreateModelRequest model) {
         return modelService.add(model);
     }
 
