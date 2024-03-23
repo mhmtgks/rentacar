@@ -9,12 +9,8 @@ import java.util.List;
 
 public interface TransmissionService {
     CreateTransmissionResponse add(CreateTransmissionRequest createTransmissionRequest);
-
-    Transmission update(Transmission transmission);
-
+    List<CreateTransmissionResponse> getAll();
+    CreateTransmissionResponse get(int id);
+    CreateTransmissionResponse update(int id, CreateTransmissionRequest createTransmissionRequest);
     void delete(int id);
-
-    List<Transmission> getAll();
-
-    Transmission get(int id);
 }

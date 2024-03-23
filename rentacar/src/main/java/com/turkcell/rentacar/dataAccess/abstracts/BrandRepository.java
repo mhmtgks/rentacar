@@ -9,5 +9,4 @@ public interface BrandRepository extends JpaRepository<Brand,Integer> {
 
     Optional<Brand> findByNameIgnoreCase(String Name);
 
-
 }

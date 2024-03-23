@@ -3,6 +3,7 @@ package com.turkcell.rentacar.businnes.concretes;
 
 import com.turkcell.rentacar.businnes.abstracts.TransmissionService;
 import com.turkcell.rentacar.core.utilities.mapping.ModelMapperManager;
+import com.turkcell.rentacar.core.utilities.mapping.ModelMapperService;
 import com.turkcell.rentacar.dataAccess.abstracts.TransmissionRepository;
 import com.turkcell.rentacar.dtos.reponses.CreateTransmissionResponse;
 import com.turkcell.rentacar.dtos.requests.CreateTransmissionRequest;
@@ -11,81 +12,95 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
 @Service
 public class TransmissionManager implements TransmissionService {
-    TransmissionRepository transmissionRepository; // IoC
-    private static final String transmissionNotFoundMessage = "Transmission not found";
-    private static final String transmissionAlreadyExistsMessage = "Transmission already exists";
-    private ModelMapperManager modelMapperService;
+
+    private TransmissionRepository transmissionRepository;
+    private ModelMapperService modelMapperService;
 
 
     @Override
     public CreateTransmissionResponse add(CreateTransmissionRequest createTransmissionRequest) {
-        Transmission transmission =this.modelMapperService.forRequest().map(createTransmissionRequest,Transmission.class);
+        Transmission transmission = this.modelMapperService.forRequest().map(createTransmissionRequest,Transmission.class);
         transmission.setCreatedDate(LocalDateTime.now());
-
         Transmission createdTransmission = transmissionRepository.save(transmission);
-
-        CreateTransmissionResponse createTransmissionResponse= this.modelMapperService.forResponse().map(createdTransmission,CreateTransmissionResponse.class);;
-
-        return createTransmissionResponse;
+        CreateTransmissionResponse createdTransmissionResponse =
+                this.modelMapperService.forResponse().map(createdTransmission,CreateTransmissionResponse.class);
+        return createdTransmissionResponse;
     }
 
     @Override
-    public Transmission update(Transmission transmission) {
-        // TODO: Validation rules
-        Optional<Transmission> foundOptionalTransmission = transmissionRepository.findById(transmission.getId());
-        transmissionShouldBeExist(foundOptionalTransmission);
-        transmissionNameCanNotBeDuplicatedWhenUpdated(transmission);
+    public List<CreateTransmissionResponse> getAll() {
+        List<Transmission> transmissions = transmissionRepository.findAll();
+        List<CreateTransmissionResponse> transmissionResponses = new ArrayList<>();
+        for (var transmission: transmissions){
+            CreateTransmissionResponse createdTransmissionResponse =
+                    this.modelMapperService.forResponse().map(transmission,CreateTransmissionResponse.class);
+            transmissionResponses.add(createdTransmissionResponse);
+        }
+        return transmissionResponses;
+    }
 
-        Transmission transmissionToUpdate = foundOptionalTransmission.get();
-        transmissionToUpdate.setName(transmission.getName()); // TODO: mapper
+    @Override
+    public CreateTransmissionResponse get(int id) {
+        Optional<Transmission> transmissionOptional = transmissionRepository.findById(id);
+        Transmission transmission = transmissionOptional.get();
+        CreateTransmissionResponse createdTransmissionResponse =
+                this.modelMapperService.forResponse().map(transmission,CreateTransmissionResponse.class);
 
-        return transmissionRepository.save(transmissionToUpdate);
+        return createdTransmissionResponse;
+    }
+
+    @Override
+    public CreateTransmissionResponse update(int id, CreateTransmissionRequest createTransmissionRequest) {
+        Optional<Transmission> transmissionOptional = transmissionRepository.findById(id);
+        if (transmissionOptional.isPresent()){
+            Transmission transmission = transmissionOptional.get();
+            this.modelMapperService.forRequest().map(createTransmissionRequest,transmission);
+            transmission.setUpdatedDate(LocalDateTime.now());
+
+            Transmission updatedTransmission = transmissionRepository.save(transmission);
+
+            CreateTransmissionResponse createdTransmissionResponse =
+                    this.modelMapperService.forResponse().map(updatedTransmission,CreateTransmissionResponse.class);
+
+            return createdTransmissionResponse;
+        }
+        else {
+            return null;
+        }
     }
 
     @Override
     public void delete(int id) {
-        Optional<Transmission> foundOptionalTransmission = transmissionRepository.findById(id);
-        transmissionShouldBeExist(foundOptionalTransmission);
-        transmissionRepository.delete(foundOptionalTransmission.get());
-    }
 
+    }
+/*
     @Override
     public List<Transmission> getAll() {
         return transmissionRepository.findAll();
     }
 
     @Override
-    public Transmission get(int id) {
-        Optional<Transmission> foundOptionalTransmission = transmissionRepository.findById(id);
-        transmissionShouldBeExist(foundOptionalTransmission);
-        return foundOptionalTransmission.get();
+    public Transmission getById(int id) {
+        return transmissionRepository.findById(id).orElse(null);
     }
 
-    // temp business rules
-    // TODO: TransmissionBusinessRules
-    private void transmissionShouldBeExist(Optional<Transmission> transmission) {
-        if (transmission.isEmpty()) {
-            throw new RuntimeException(transmissionNotFoundMessage);
-        }
+    @Override
+    public Transmission update(int id, Transmission transmission) {
+        Transmission updatedTransmission = transmissionRepository.findById(id).orElse(null);
+        updatedTransmission.setName(transmission.getName());
+        return transmissionRepository.save(updatedTransmission);
     }
 
-    private void transmissionNameCanNotBeDuplicatedWhenInserted(String name) {
-        Optional<Transmission> foundOptionalTransmission = transmissionRepository.getByNameIgnoreCase(name.trim());
-        if (foundOptionalTransmission.isPresent()) {
-            throw new RuntimeException(transmissionAlreadyExistsMessage);
-        }
+    @Override
+    public void delete(int id) {
+        transmissionRepository.deleteById(id);
     }
-
-    private void transmissionNameCanNotBeDuplicatedWhenUpdated(Transmission transmission) {
-        boolean exists = transmissionRepository.existsByNameIgnoreCaseAndIdIsNot(transmission.getName().trim(), transmission.getId());
-        if (exists) {
-            throw new RuntimeException(transmissionAlreadyExistsMessage);
-        }
-    }
+ */
 }

@@ -9,11 +9,11 @@ import java.util.List;
 public interface ModelService {
     CreateModelResponse add(CreateModelRequest model);
 
-    Model update(Model model);
+    CreateModelResponse update(int id,CreateModelRequest model);
 
     void delete(int id);
 
-    List<Model> getAll();
+    List<CreateModelResponse> getAll();
 
-    Model get(int id);
+    CreateModelResponse get(int id);
 }

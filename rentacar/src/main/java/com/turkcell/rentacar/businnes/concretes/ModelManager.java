@@ -6,6 +6,7 @@ import com.turkcell.rentacar.businnes.abstracts.FuelService;
 import com.turkcell.rentacar.businnes.abstracts.ModelService;
 import com.turkcell.rentacar.businnes.abstracts.TransmissionService;
 import com.turkcell.rentacar.core.utilities.mapping.ModelMapperManager;
+import com.turkcell.rentacar.core.utilities.mapping.ModelMapperService;
 import com.turkcell.rentacar.dataAccess.abstracts.ModelRepository;
 import com.turkcell.rentacar.dtos.reponses.CreateModelResponse;
 import com.turkcell.rentacar.dtos.reponses.GetFuelResponse;
@@ -18,93 +19,95 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @AllArgsConstructor
 @Service
 public class ModelManager implements ModelService {
-    ModelRepository modelRepository; // IoC
-    BrandService brandService;
-    FuelService fuelService;
-    TransmissionService transmissionService;
 
-    private static final String modelNotFoundMessage = "Model not found";
-    private ModelMapperManager modelMapperService;
+    private ModelRepository modelRepository;
+
+    private ModelMapperService modelMapperService;
 
 
     @Override
     public CreateModelResponse add(CreateModelRequest createModelRequest) {
-
         Model model = this.modelMapperService.forRequest().map(createModelRequest,Model.class);
         model.setCreatedDate(LocalDateTime.now());
-
-
         Model createdModel = modelRepository.save(model);
-
-        CreateModelResponse createModelResponse= this.modelMapperService.forResponse().map(createdModel,CreateModelResponse.class);
-
-
-        return createModelResponse;
-
+        CreateModelResponse createdModelResponse =
+                this.modelMapperService.forResponse().map(createdModel,CreateModelResponse.class);
+        return createdModelResponse;
     }
 
     @Override
-    public Model update(Model model) {
-        // TODO: Validation rules
-        Optional<Model> foundOptionalModel = modelRepository.findById(model.getId());
-        modelShouldBeExist(foundOptionalModel);
+    public List<CreateModelResponse> getAll() {
+        List<Model> models = modelRepository.findAll();
+        List<CreateModelResponse> modelResponses = new ArrayList<>();
+        for (var model:models){
+            CreateModelResponse createdModelResponse =
+                    this.modelMapperService.forResponse().map(model,CreateModelResponse.class);
+            modelResponses.add(createdModelResponse);
+        }
+        return modelResponses;
+    }
 
-        Model modelToUpdate = foundOptionalModel.get();
-        modelToUpdate.setName(model.getName()); // TODO: mapper
-        modelToUpdate.setDailyPrice(model.getDailyPrice());
-        modelToUpdate.setBrand(model.getBrand());
-        modelToUpdate.setFuel(model.getFuel());
-        modelToUpdate.setTransmission(model.getTransmission());
+    @Override
+    public CreateModelResponse get(int id) {
+        Optional<Model> modelOptional = modelRepository.findById(id);
+        Model model = modelOptional.get();
+        CreateModelResponse createdModelResponse =
+                this.modelMapperService.forResponse().map(model,CreateModelResponse.class);
+        return createdModelResponse;
+    }
 
-        brandIdShouldBeExist(modelToUpdate.getBrand().getId());
-        fuelIdShouldBeExist(modelToUpdate.getFuel().getId());
-        transmissionIdShouldBeExist(modelToUpdate.getTransmission().getId());
+    @Override
+    public CreateModelResponse update(int id, CreateModelRequest createModelRequest) {
+        Optional<Model> modelOptional = modelRepository.findById(id);
+        if (modelOptional.isPresent()){
+            Model model = modelOptional.get();
+            this.modelMapperService.forRequest().map(createModelRequest,model);
+            model.setUpdatedDate(LocalDateTime.now());
 
-        return modelRepository.save(modelToUpdate);
+            Model updatedModel = modelRepository.save(model);
+
+            CreateModelResponse createdModelResponse =
+                    this.modelMapperService.forResponse().map(updatedModel,CreateModelResponse.class);
+            return createdModelResponse;
+        }else {
+
+            return null;
+        }
+
     }
 
     @Override
     public void delete(int id) {
-        Optional<Model> foundOptionalModel = modelRepository.findById(id);
-        modelShouldBeExist(foundOptionalModel);
-        modelRepository.delete(foundOptionalModel.get());
-    }
 
+    }
+/*
     @Override
     public List<Model> getAll() {
         return modelRepository.findAll();
     }
 
     @Override
-    public Model get(int id) {
-        Optional<Model> foundOptionalModel = modelRepository.findById(id);
-        modelShouldBeExist(foundOptionalModel);
-        return foundOptionalModel.get();
+    public Model getById(int id) {
+        return modelRepository.findById(id).orElse(null);
     }
 
-    // temp business rules
-    // TODO: ModelBusinessRules
-    private void modelShouldBeExist(Optional<Model> model) {
-        if (model.isEmpty()) {
-            throw new RuntimeException(modelNotFoundMessage);
-        }
+    @Override
+    public Model update(int id, Model model) {
+        Model updatedModel = modelRepository.findById(id).orElse(null);
+        updatedModel.setName(model.getName());
+        return modelRepository.save(updatedModel);
     }
 
-    private void brandIdShouldBeExist(int brandId) {
-        Brand brand = brandService.get(brandId);
+    @Override
+    public void delete(int id) {
+        modelRepository.deleteById(id);
     }
-
-    private void fuelIdShouldBeExist(int fuelId) {
-        GetFuelResponse fuel = fuelService.get(fuelId);
-    }
-
-    private void transmissionIdShouldBeExist(int transmissionId) {
-        Transmission transmission = transmissionService.get(transmissionId);
-    }
+ */
 }

@@ -8,6 +8,7 @@ import com.turkcell.rentacar.dtos.reponses.CreateBrandResponse;
 import com.turkcell.rentacar.dtos.requests.CreateBrandRequest;
 import com.turkcell.rentacar.entities.concretes.Brand;
 import lombok.AllArgsConstructor;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,20 +19,27 @@ import java.util.List;
 public class BrandManager implements BrandService {
 
     private BrandRepository brandRepository;
-
     private ModelMapperService modelMapperService;
     private BrandBusinnesRules brandBusinnesRules;
+
+
     @Override
     public CreateBrandResponse add(CreateBrandRequest createBrandRequest) {
+
+        brandBusinnesRules.brandNameCanNotBeDuplicated(createBrandRequest.getName());
+
         Brand brand = this.modelMapperService.forRequest().map(createBrandRequest,Brand.class);
         brand.setCreatedDate(LocalDateTime.now());
+
         Brand createdBrand =  brandRepository.save(brand);
+
         CreateBrandResponse createdBrandResponse =this.modelMapperService.forResponse().map(createdBrand,CreateBrandResponse.class);
+
         return createdBrandResponse;
     }
 
     @Override
-    public Brand update(Brand brand) {
+    public CreateBrandResponse update(CreateBrandRequest createBrandRequest) {
         return null;
     }
 
@@ -41,12 +49,12 @@ public class BrandManager implements BrandService {
     }
 
     @Override
-    public List<Brand> getAll() {
+    public List<CreateBrandResponse> getAll() {
         return null;
     }
 
     @Override
-    public Brand get(int id) {
+    public CreateBrandResponse get(int id) {
         return null;
     }
 

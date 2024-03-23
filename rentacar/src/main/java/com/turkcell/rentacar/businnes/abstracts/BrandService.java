@@ -9,12 +9,12 @@ import java.util.List;
 public interface BrandService {
     CreateBrandResponse add(CreateBrandRequest createBrandRequest);
 
-    Brand update(Brand brand);
+    CreateBrandResponse update(CreateBrandRequest createBrandRequest);
 
     void delete(int id);
 
-    List<Brand> getAll();
+    List<CreateBrandResponse> getAll();
 
-    Brand get(int id);
+    CreateBrandResponse get(int id);
 
 }
